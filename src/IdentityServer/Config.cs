@@ -1,6 +1,4 @@
-﻿using Duende.IdentityServer;
-using Duende.IdentityServer.Models;
-using IdentityModel;
+﻿using Duende.IdentityServer.Models;
 
 namespace IdentityServer;
 
@@ -8,7 +6,7 @@ public static class Config
 {
     public static IEnumerable<IdentityResource> IdentityResources =>
         new IdentityResource[]
-        { 
+        {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
             new IdentityResources.Email()
@@ -16,53 +14,78 @@ public static class Config
 
     public static IEnumerable<ApiScope> ApiScopes =>
         new ApiScope[]
-            {
-                new ApiScope("api1", "My API")
-            };
+        {
+            new ApiScope("calc:double", "Double a number"),
+            new ApiScope("calc:square", "Square a number"),
+        };
 
     public static IEnumerable<ApiResource> ApiResources =>
-        new ApiResource[] 
+        new ApiResource[]
+        {
+            new ApiResource("urn:calcapi", "Calculator API")
             {
-                new ApiResource("api1", "My API")
-                {
-                    Scopes = { "api1" }                    
-                }
-            };
+                Scopes = { "calc:double", "calc:square" },
+
+                RequireResourceIndicator = true
+            }
+        };
 
     public static IEnumerable<Client> Clients =>
-        new Client[] 
+        new Client[]
+        {
+            new Client
             {
-                new Client
+                ClientId = "console",
+                ClientName = "Console Client",
+                // no interactive user, use the clientid/secret for authentication
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                // secret for authentication
+                ClientSecrets =
                 {
-                    ClientId = "client",
-                    ClientName = "Client Credentials Client",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-
-                    AllowedScopes = { "api1" }
+                    new Secret("secret".Sha256())
                 },
-                new Client
+                // scopes that client has access to
+                AllowedScopes = {
+                    "calc:double",
+                    "calc:square"
+                },
+            },
+            new Client
+            {
+                ClientId = "worker",
+                ClientName = "RefreshClient",
+                // no interactive user, use the clientid/secret for authentication
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                // secret for authentication
+                ClientSecrets =
                 {
-                    ClientId = "web",
-                    ClientName = "Web Client",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-                    
-                    AllowedGrantTypes = GrantTypes.Code,
+                    new Secret("secret".Sha256())
+                },
+                // scopes that client has access to
+                AllowedScopes = {
+                    "calc:double",
+                    "calc:square"
+                },
 
-                    RedirectUris = { "https://localhost:5002/signin-oidc" },
+                AccessTokenLifetime = 75
+            },
+            new Client
+            {
+                ClientId = "web",
+                ClientSecrets = { new Secret("secret".Sha256()) },
+                ClientName = "Web Client",
 
-                    PostLogoutRedirectUris = { "https://localhost:5002/signout-callback-oidc" },
+                AllowedGrantTypes = GrantTypes.Code,
+                RequirePkce = true,
 
-                    AllowOfflineAccess = true,
-                        
-                    AllowedScopes = new List<string>
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Email,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        "api1"
-                    }
-                }
-            };
+                RedirectUris = { "https://localhost:5002/signin-oidc" },
+                FrontChannelLogoutUri = "https://localhost:5002/signout-oidc",
+                PostLogoutRedirectUris = { "https://localhost:5002/signout-callback-oidc" },
+
+                AllowOfflineAccess = true,
+                AllowedScopes = { "openid", "profile", "email", "calc:double", "calc:square" },
+
+                RequireConsent = true
+            }
+        };
 }
