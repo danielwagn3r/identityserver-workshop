@@ -1,0 +1,6 @@
+@CalcApi_HostAddress = http://localhost:5000
+
+GET {{CalcApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
