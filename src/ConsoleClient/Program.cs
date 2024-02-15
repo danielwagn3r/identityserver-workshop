@@ -1,10 +1,10 @@
-﻿using IdentityModel.Client;
+﻿// See https://aka.ms/new-console-template for more information
+using IdentityModel.Client;
 using System.Text.Json;
 
-// See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
-// discover endpoints from metadata
+// discover endpoints from well-known openid-configuration
 var client = new HttpClient();
 var disco = await client.GetDiscoveryDocumentAsync("https://localhost:5001");
 if (disco.IsError)
@@ -18,9 +18,12 @@ var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCr
 {
     Address = disco.TokenEndpoint,
 
-    ClientId = "client",
+    ClientId = "console",
     ClientSecret = "secret",
-    Scope = "api1"
+
+    Resource = { "urn:calcapi" },
+
+    Scope = "calc:double calc:square"
 });
 
 if (tokenResponse.IsError)
@@ -35,13 +38,14 @@ Console.WriteLine(tokenResponse.AccessToken);
 var apiClient = new HttpClient();
 apiClient.SetBearerToken(tokenResponse.AccessToken);
 
-var response = await apiClient.GetAsync("https://localhost:6001/identity");
+var response = await apiClient.GetAsync("https://localhost:6001/Double/2");
 if (!response.IsSuccessStatusCode)
 {
     Console.WriteLine(response.StatusCode);
 }
 else
 {
-    var content = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
-    Console.WriteLine(JsonSerializer.Serialize(content, new JsonSerializerOptions { WriteIndented = true }));
+    var content = await response.Content.ReadAsStringAsync();
+    var doc = JsonDocument.Parse(content).RootElement;
+    Console.WriteLine(JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true }));
 }
