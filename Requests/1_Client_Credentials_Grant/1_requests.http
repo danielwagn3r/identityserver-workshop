@@ -1,0 +1,49 @@
+##########
+#
+# Client Credentials Grant
+#
+# https://datatracker.ietf.org/doc/html/rfc6749#section-4.4
+#
+##########
+
+
+#####
+# Configuration --> use Client Credentials Grant
+
+@client_id= worker
+@client_secret = secret
+@scope = calc:double
+
+#
+#####
+
+
+# Get Access Token for Client (double-only)
+# @name token 
+POST {{tenant}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id={{client_id}}
+&client_secret={{client_secret}}
+&scope={{scope}}
+
+###
+# @name double
+
+@access_token = {{token.response.body.$.access_token}}
+
+# Call API
+GET {{api}}/Double/2
+Authorization: Bearer {{access_token}}
+
+
+###
+# @name square
+
+@access_token = {{token.response.body.$.access_token}}
+
+# Call API
+GET {{api}}/Square/2
+Authorization: Bearer {{access_token}}
+

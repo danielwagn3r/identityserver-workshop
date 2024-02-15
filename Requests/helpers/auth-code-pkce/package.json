@@ -1,0 +1,19 @@
+{
+  "name": "auth-code-pkce",
+  "version": "1.0.0",
+  "description": "PKCE utility for OAuth 2.0 authorization code grant",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "oauth2",
+    "oidc",
+    "pkce",
+    "authorization code"
+  ],
+  "author": "Daniel Wagner <daniel@danielwagner.at>",
+  "license": "MIT",
+  "dependencies": {
+    "base64url": "^3.0.1"
+  }
+}

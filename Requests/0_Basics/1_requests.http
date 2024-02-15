@@ -1,0 +1,23 @@
+##########
+#
+# Basics (Metadata)
+#
+##########
+
+
+# OpenID Provider Configuration Request
+# https://openid.net/specs/openid-connect-discovery-1_0.html
+#
+# @name configuration
+GET {{tenant}}/.well-known/openid-configuration
+
+###
+
+@jwks_uri = {{configuration.response.body.$.jwks_uri}}
+
+# JSON Web Key Set document
+# https://tools.ietf.org/html/draft-ietf-jose-json-web-key-31
+#
+# @name jwks
+
+GET {{jwks_uri}}

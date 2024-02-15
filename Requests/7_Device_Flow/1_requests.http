@@ -1,0 +1,74 @@
+##########
+#
+# Device Authorization Grant
+#
+# https://datatracker.ietf.org/doc/html/rfc8628
+#
+##########
+
+
+#####
+# Configuration --> use Device Code Grant
+
+@client_id = device
+@client_secret = secret
+@scope = openid email profile offline_access calc:double
+@resource = urn:calcapi
+
+#
+#####
+
+# Get Device Code
+# @name devicecode
+
+POST {{tenant}}/connect/deviceauthorization
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{client_id}}
+&client_secret={{client_secret}}
+&scope={{scope}}
+&resource={{resource}}
+
+
+###
+
+@device_code = {{devicecode.response.body.$.device_code}}
+@user_code = {{devicecode.response.body.$.user_code}}
+
+# Get Token
+# @name token
+
+POST {{tenant}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:device_code
+&client_id={{client_id}}
+&client_secret={{client_secret}}
+&device_code={{device_code}}
+
+###
+
+@access_token = {{token.response.body.$.access_token}}
+@id_token = {{token.response.body.$.id_token}}
+
+# Get Userinfo with identity token
+GET {{tenant}}/connect/userinfo
+Authorization: Bearer {{access_token}}
+
+###
+
+# Double Calucator API
+GET https://localhost:6001/Double/3
+Authorization: Bearer {{access_token}}
+
+###
+
+# Square Calucator API
+GET https://localhost:6001/Square/3
+Authorization: Bearer {{access_token}}
+
+###
+
+# Tokeninfo Calucator API
+GET http://localhost:5001/api/tokeninfo
+Authorization: Bearer {{access_token}}

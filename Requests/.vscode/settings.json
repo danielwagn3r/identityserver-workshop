@@ -1,0 +1,9 @@
+{
+    "rest-client.environmentVariables": {
+        "$shared": {
+            "api": "https://localhost:6001",
+            "tenant": "https://localhost:5001",
+            "audience": "urn:calcapi"
+        }
+    }
+}
